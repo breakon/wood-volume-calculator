@@ -1,0 +1,19 @@
+
+*{
+    margin :0px;
+    padding:0px;
+}
+html{
+    height: 100%;
+}
+body{
+    color: #333;
+}
+.vertical-flex{ 
+    display: flex;
+    justify-content:center;
+    align-items:Center; 
+}
+.margin-top10{
+    margin-top: 10px;
+}
