@@ -11,9 +11,9 @@
           <div class="grid-content vertical-flex">材积表</div>
         </el-col>
         <el-col :span="6">
-          <router-link to="Test">  
+          <!-- <router-link to="Test">   -->
           <div class="grid-content vertical-flex">关于产品</div>
-          </router-link>
+          <!-- </router-link> -->
         </el-col>
         <el-col :span="6">
           <div class="grid-content vertical-flex">个人服务</div>

@@ -1,7 +1,8 @@
 <!--父组件中引入子组件-->
 <template>
   <div>
-    <a href="javascript:;" @click="show = true">点击</a>
+    <!-- <a href="javascript:;" @click="show = true">点击</a> -->
+    
     <t-dialog :show.sync="show"></t-dialog> 
       <!-- </template> -->
       

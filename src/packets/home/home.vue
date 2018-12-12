@@ -45,7 +45,7 @@
      <div class="input-box">
     <el-card class="box-card">
   <div slot="header" class="clearfix">
-    <span>总额 ：0.00 </span>  
+    <span>总额 ：{{clickWood.sum}} </span>  
   </div> 
   <div @click="calculations"  class="text item">
      <div v-bind:class="{ opacityfont:isOpacity[0]}" >小：<span >{{little}}</span></div>
@@ -109,7 +109,7 @@ export default {
           label: 'label',  
         },
         addId:0, //增加的树id
-        woodType:[ {type:'杂木',statu:false},{type:'樟木',statu:false},{type:'苦楝木',statu:false},{type:'春芽木',statu:false},{type:'其他木',statu:false}],
+        woodType:[ {type:'杂木',statu:false},{type:'樟木',statu:true},{type:'苦楝木',statu:true},{type:'春芽木',statu:true},{type:'其他木',statu:true}],
         clickWood:[],//点击的数组
         woodT:[],
         showgroup:"", 
@@ -143,11 +143,11 @@ export default {
          console.log("command",command);
         let tWType=t.woodType;  
          switch(command){
-          case tWType[0].type:this.data.push({id:t.addId++,label: command,
-            children: [{id:t.addId++,label:'小 L X D',children:[] }]}) ;tWType[0].statu=true;
+          case tWType[0].type:this.data.push({id:t.addId++,label: command,sum:0,
+            children: [{id:t.addId++,label:'小 L X D',children:[],big:[]} ] }) ;tWType[0].statu=true;
             break;//杂木
           case tWType[1].type:t.data.push({id:t.addId++,label: command,
-            children: [{id:t.addId++,label:'小',children:[]},{id:t.addId++,label:'中',children:[]},{id:t.addId++,label:'大',children:[]}] 
+            children: [{id:t.addId++,label:'小',children:[],big:["2 x 14"]},{id:t.addId++,label:'中',children:[],big:["2 x 14"]},{id:t.addId++,label:'大',children:[],big:[]}] 
             }); tWType[1].statu=true; ;break; //樟木
 
           case tWType[2].type:t.data.push({id:t.addId++,label: command,
@@ -160,7 +160,7 @@ export default {
        handleNodeClick(data ,e ,vueComp ) {
         // 点击木材表树 返回对应点击的元素值
           // console.clear()  
-        console.log( "handleNodeCilk",data,e); 
+        console.log( "handleNodeCilk",data);  
         let woodIndex=this.woodTIndex().indexOf(data.label)
         if(woodIndex>-1){
           if(vueComp.$el.parentNode.querySelectorAll('.select-wood').length>0){ 
@@ -174,38 +174,60 @@ export default {
       },
 
       // 运算
-      calculations:function(){ 
-        console.log(this.showgroup);
+      calculations:function(){  
       if(this.showgroup==""){
       this.open_warn('请选择木材')
         return false
-      } 
-      
-     
-      console.log("点击运算的对象数组 :",this.clickWood)
+      }  
       let multiple=this.selectType(this.showgroup,this.D).m //判断木头种类返回的值是多少 
-      this.addSum(multiple)//计算
-      this.append(this.data)//添加的木材表对应节点
+      //计算
+      this.append(this.addSum(multiple))//添加的木材表对应节点
       },  
-       append() {
-        // 增加
-       let newChild ={ id: this.addId++,label: this.toStrWoodVale(), }
-       console.log( this.children[].childNodes)
+       append(res) {
+        // 增加 
+        // if(this.clickWood.big=){}
+        let toStr;
+        // console.log('append',this.clickWood.children[0])  
+        let repe=String(this.L+"x"+this.D);
+
+        console.log("repe",repe.length)
+        let  repeValue=this.clickWood.children[0].big.filter(function(item){return item.only==repe })
+        console.log('repeValue.length',repeValue.length)
+         if(  repeValue.length>0){  
+          console.log('append重复进入') 
+           let arrRepe=this.clickWood.children[0].children; 
+           for(let i=0;i<arrRepe.length;i++){ 
+             if(arrRepe[i]&&arrRepe[i].label.split(" 根")[0]==repe){
+                arrRepe.splice(i,1) //删除重复
+             }
+           }
+             
+            let nub=repeValue[0].nub+=this.nubValue 
+            console.log("nub ", nub)
+            let vd=
+            // debugger
+            console.log(vd)
+            toStr=[this.L,"x",this.D," 根:", nub," 单个",this.valeData()," ￥",0] 
+              
+              
+          }else{
+             console.log('append 第一次进入')
+            toStr=[this.L,"x",this.D," 根:", this.nubValue," 单个",this.valeData()," ￥",0] 
+            
+            this.clickWood.children[0].big.push({only:toStr[0]+toStr[1]+toStr[2],nub:this.nubValue})  
+         }
+
+toStr[8]=(toStr[8]+(toStr[4]*(+this.valeData())*500)).toFixed(3);
+this.clickWood.sum=res
+      
+       let newChild ={ id: this.addId++,label:toStr.join("") }
+      //  console.log( this.children[0].children)
         
         if (!this.clickWood.children[0].children) {
           this.$set(this.clickWood, 'children', []);
         }
-        this.clickWood.children[0].children.push(newChild);
-      },
-      //把数据转换为字符
-      toStrWoodVale(){
-        let i=1;
-          let b=this.L+' x '+this.D 
-          
-          // this.data
-          let a=b+' 根:'+i+' ￥50';
-          return a
-      },
+        this.clickWood.children[0].children.push(newChild);//小中大
+      }, 
       woodTIndex(){
         // 对象的位置
         let type=[];
