@@ -217,8 +217,8 @@ export default {
             this.clickWood.children[0].big.push({only:toStr[0]+toStr[1]+toStr[2],nub:this.nubValue})  
          }
 
-toStr[8]=(toStr[8]+(toStr[4]*(+this.valeData())*500)).toFixed(3);
-this.clickWood.sum=res
+          toStr[8]=(toStr[8]+(toStr[4]*(+this.valeData())*500)).toFixed(3);
+          this.clickWood.sum=res
       
        let newChild ={ id: this.addId++,label:toStr.join("") }
       //  console.log( this.children[0].children)
