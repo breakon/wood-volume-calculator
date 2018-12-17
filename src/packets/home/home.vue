@@ -103,8 +103,7 @@ export default {
         L: 2,D:14,nubValue: 1, little:0 ,medium:0 ,big:0 ,sum:0, 
         isOpacity:[false,false,false],
         defaultProps: { children: 'children', label: 'label',  },
-        addId:0, //增加的树id
-        // woodType:[ {type:'杂木',statu:false},{type:'樟木',statu:true},{type:'苦楝木',statu:true},{type:'春芽木',statu:true},{type:'其他木',statu:true}],
+        addId:0, //增加的树id 
         clickWood:[],//点击的数组
         woodT:[],
         showgroup:"", 
@@ -140,11 +139,8 @@ export default {
   methods:{ 
        handleCommand(command ){ 
         //  下拉框选择木材
-         console.clear() 
-         const t=this; 
-         console.log("command",command);
-        let wood=t.wood;  
-
+         console.clear() ; console.log("command",command);
+         const t=this; let wood=t.wood;  
          switch(command){
           case wood[0].type: wood[0].tree=this.initWoddType(0,command);t.data.push(wood[0].tree) ;wood[0].statu=true; break;//杂木 initWoddType 0默认为小
           case wood[1].type: wood[1].tree=this.initWoddType(2,command);t.data.push(wood[1].tree) ;wood[1].statu=true; break;//樟木              2是全部类型
@@ -153,22 +149,10 @@ export default {
          }  
          
       }, 
-      initWoddType(typeNub,woodType){
-        // 0小 2中 1大 
-            const t=this;
-            let type={id:t.addId++,label:woodType,sum:0, children: [ {id:t.addId++,label:'小',children:[],unRepe:[]} ]}
-            let newType={...type.children[0] }; //创建新的类型 浅拷贝这一层
-            //有中的话就执行全部 ，小是默认执行
-            switch(typeNub){
-              case 2:  newType.label='中';newType.id=t.addId++; type.children.push({...newType});  
-              case 1:  newType.label='大';newType.id=t.addId++; type.children.push({...newType}); break; 
-            }
-            return type 
-      },
+ 
        handleNodeClick(data ,e ,vueComp ) {
         // 点击木材表树 返回对应点击的元素值
           // console.clear()  
-        console.log( "handleNodeCilk",data);  
         let woodIndex=this.woodTIndex().indexOf(data.label)
         if(woodIndex>-1){
           if(vueComp.$el.parentNode.querySelectorAll('.select-wood').length>0){ 
@@ -177,88 +161,63 @@ export default {
           }
           vueComp.$el.childNodes[0].className +=" select-wood"  
            this.showgroup=data.label; //点击的   
+           console.log( "handleNodeCilk",data);  
            this.clickWood=data
         }  
       },
 
       // 运算
       calculations:function(){  
-      if(this.showgroup==""){
-      this.open_warn('请选择木材')
-        return false
-      }  
-      let multiple=this.selectType(this.showgroup,this.D).m //判断木头种类返回的值是多少 
-      //计算
-      this.append(this.addSum(multiple))//添加的木材表对应节点
+      if(this.showgroup==""){this.open_warn('请选择木材'); return false}  
+      let typeSize=this.selectType(this.showgroup,this.D)
+      let multiple=typeSize.m //判断木头种类返回的值是多少  
+      this.addSum(multiple)
+      this.append(typeSize.s)//添加的木材表对应节点
       },  
-       append(res) {
+      append(res) {
         // 增加   
         let nowLxD=String(this.L+"x"+this.D); // 当前增加的值
-        
-        let obj={'2x14': { num: 1, univalence: 0.32 } ,'2x12': { num: 1, univalence: 0.32 } }
-        // obj[nowLxD1]={num:1,univalence:0.32} 
-        if(this.clickWood[nowLxD]!==undefined){
-        console.log('重复值')
-           this.clickWood[nowLxD].num=this.clickWood[nowLxD].num+this.nubValue
-        }else{
-        console.log('新的值')
-          this.clickWood[nowLxD]={ num: this.nubValue, univalence: this.valeData }  
-
-           let newChild ={ id: this.addId++,label:`${nowLxD} 根:${this.nubValue} 单价:${this.valeData()} ￥0` }
-           this.clickWood.children[0].children.push(newChild);
+        let [strLable,typeSize]=["",res]//0是小，以此类推 中 大 
+        let  unRepe=this.clickWood.children[typeSize].unRepe;
+        if(unRepe[nowLxD]!==undefined){ 
+           console.clear(); console.log('重复值')
+           unRepe[nowLxD].num=Number(unRepe[nowLxD].num+this.nubValue) //当前根数加上原来的根数 
+            let arrRepe=this.clickWood.children[typeSize].children; let oldVal=0;
+           for(let i=0;i<arrRepe.length;i++){ 
+             if(arrRepe[i]&&arrRepe[i].label.split(" 根")[0]==nowLxD){
+                oldVal=arrRepe[i].id//保存重复出现的木头的id 使保持不变
+                arrRepe.splice(i,1)  ;break; 
+             }//删除重复
+           }  
+          strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 单价:${this.valeData()} ￥0`
+          let newChild ={ id:oldVal ,label:strLable  }
+           console.log(newChild)
+          this.clickWood.children[typeSize].children.push(newChild);
+        }else{ 
+          console.log('新的值newUnRepe',this.nubValue)
+          unRepe[nowLxD]={ num: this.nubValue, univalence: this.valeData() } //创建一个记录重复值的对象 
+          strLable=`${nowLxD} 根:${this.nubValue} 单价:${this.valeData()} ￥0`
+          let newChild ={ id: this.addId++,label:strLable  }
+          this.clickWood.children[typeSize].children.push(newChild);
         }
-        console.log('wood:',this.wood)
-
-        // if(addSet.has(nowLxD)){
-        //   //重复的值进入
-        // console.log('重复的值为：',nowLxD)
-        //  }else{
-        // addSet.add(nowLxD); 
-        // this.wood[0].tree.children[0].unRepe.push({nowLxD:1})
-        //  }
+        console.log('wood:',this.wood)  
         
-       
-        
-        console.log('append',res)
-        
-        // if()
-        // let toStr;  
-        // let repe=String(this.L+"x"+this.D); 
-        // console.log("repe",repe.length)
-        // let  repeValue=this.clickWood.children[0].big.filter(function(item){return item.only==repe })
-        // console.log('repeValue.length',repeValue.length)
-        //  if(  repeValue.length>0){  
-        //   console.log('append重复进入') 
-        //    let arrRepe=this.clickWood.children[0].children; 
-        //    for(let i=0;i<arrRepe.length;i++){ 
-        //      if(arrRepe[i]&&arrRepe[i].label.split(" 根")[0]==repe){
-        //         arrRepe.splice(i,1) //删除重复
-        //      }
-        //    }
-             
-        //     let nub=repeValue[0].nub+=this.nubValue 
-        //     console.log("nub ", nub) 
-        //     toStr=[this.L,"x",this.D," 根:", nub," 单个",this.valeData()," ￥",0] 
-              
-              
-        //   }else{
-        //      console.log('append 第一次进入')
-        //     toStr=[this.L,"x",this.D," 根:", this.nubValue," 单个",this.valeData()," ￥",0] 
-            
-        //     this.clickWood.children[0].big.push({only:toStr[0]+toStr[1]+toStr[2],nub:this.nubValue})  
-        //  }
-
-      //     toStr[8]=(toStr[8]+(toStr[4]*(+this.valeData())*500)).toFixed(3);
-      //     this.clickWood.sum=res
-      
-      //  let newChild ={ id: this.addId++,label:'123' }
-      // //  console.log( this.children[0].children)
-        
-      //   if (!this.clickWood.children[0].children) {
-      //     this.$set(this.clickWood, 'children', []);
-      //   }
-      //   this.clickWood.children[0].children.push(newChild);//小中大
+         
       }, 
+      initWoddType(typeNub,woodType){
+      //初始化添加木头类型 0小 2中 1大 
+        const t=this;
+        let type={id:t.addId++,label:woodType,sum:0, children: [ {id:t.addId++,label:'小',children:[],unRepe:{}} ]}
+        //  newType={...type.children[0] }; //创建新的类型 浅拷贝这一层
+       let newType=this.clone(type.children[0])
+        //有中的话就执行全部 ，小是默认执行
+        switch(typeNub){
+          case 2:  let newTypes=this.clone(newType);newTypes.label='中';newTypes.id= t.addId++; type.children.push({...newTypes});
+          case 1:  newType.label='大';newType.id= t.addId++; type.children.push({...newType}); break; 
+        }
+        console.log("type:",type)
+        return type 
+      },  
       woodTIndex(){
         // 木头类型位置['杂木','樟木',...]
         let type=[]; this.wood.forEach(v => {
@@ -266,7 +225,6 @@ export default {
         });  
         return type// 返回结果为 ['杂木','樟木',...] 
       }, 
-
       
       remove(node, data,e){  
         // 删除
@@ -284,20 +242,20 @@ export default {
       },
       selectType(v,D){
         console.log(v,D)
-        let[ m,n]=[0,0] 
+        let[ m,n,s]=[0,0,0] 
         if(v=="樟木"){
-          if (D >= 30){ m=1500;  n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3)) }
-          else if (D >= 20 ){ m=1000 ;n=+(this.medium+this.valeData()) ; this.medium=+(n.toFixed(3))}
-          else {m=600 ; n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3))}
+          if (D >= 30){ m=1500;  n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3)) ;s=2 }
+          else if (D >= 20 ){ m=1000 ;n=+(this.medium+this.valeData()) ; this.medium=+(n.toFixed(3)); s=1 }
+          else {m=600 ; n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3));  }
         }
         else if(v=="苦楝木"){
-          if(D>=20) {m=600 ;n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3))}
+          if(D>=20) {m=600 ;n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3));s=1}
           else {m=500;n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3))}
           
         }else{
           m=500;n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3));
         } 
-        return {m,n}
+        return {m,n,s}
        
       },
       valeData(){
@@ -320,6 +278,9 @@ export default {
           type: 'warning'
         });
       },
+      clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
         
     
       
