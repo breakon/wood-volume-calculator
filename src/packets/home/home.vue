@@ -88,7 +88,6 @@ export default {
       defaultProps: { children: 'children', label: 'label' },
       addId:0, //增加的树id 
       clickWood:[],//点击的数组
-      woodT:[],
       showgroup:"", 
       wood:[
       {type:'杂木',statu:false,tree:{}}, //tree返回的值放入data对应的数据展示
@@ -99,6 +98,12 @@ export default {
       ],
     }
   },
+  //  computed:{
+  //    sum:function(v1,v2){  
+  //      console.log('计算属性 run ok' ,v1,v2) 
+  //     //  return v1+1
+  //    }
+  //   },
    watch:{
       showgroup:function(newVal, oldVal){
         console.log("show:",newVal)
@@ -114,27 +119,17 @@ export default {
         case 3: opacity[0]=false; opacity[1]=false; opacity[2]=false;break;
         default: alert('数据异常')
         }
-      }
-      // 保存输入
-      for(let i=0;i<this.data.length;i++){
-        if(this.data[i].label===oldVal){
-         this.data[i].little=this.little; 
-          this.data[i].medium=this.medium;
-          this.data[i].big=this.big;
-          this.data[i].sum=this.sum;
-          break;
-        }
-        
       } 
-      
+      //取出切换的
       let tree=this.clickWood
       this.little=tree.little;
       this.medium=tree.medium;
       this.big= tree.big
       this.sum= tree.sum
-       return this.showgroup
+      return this.showgroup
       }
     } ,
+   
   methods:{  
        /** 下拉框选择木材 */
        handleCommand(command ){ 
@@ -170,10 +165,15 @@ export default {
       let typeSize=this.selectType(this.showgroup,this.D)
       let multiple=typeSize.m //判断木头种类返回的值是多少  
       this.addSum(multiple)
-      this.append(typeSize.s)//添加的木材表对应节点
+      this.append(typeSize.s,typeSize.m)//添加的木材表对应节点 . 存储乘积结果
+      //同步计算结果
+      this.clickWood.little=+this.little; 
+      this.clickWood.medium=+this.medium;
+      this.clickWood.big=+this.big;
+      this.clickWood.sum=+this.sum; 
       },
       /** 添加 */
-      append(res) { 
+      append(res,productNum) { 
         let nowLxD=String(this.L+"x"+this.D); // 当前增加的值
         let [strLable,typeSize]=["",res]//0是小，以此类推 中 大 
         let  unRepe=this.clickWood.children[typeSize].unRepe;
@@ -197,39 +197,67 @@ export default {
           strLable=`${nowLxD} 根:${this.nubValue} 单价:${this.valeData()} ￥0`
           let newChild ={ id: this.addId++,label:strLable  }
           this.clickWood.children[typeSize].children.push(newChild);
+          unRepe.type[1]=productNum;//保存类型乘积数
         }
       }, 
       /** 初始化添加木头类型 0小 2中 1大 */
       initWoddType(typeNub,woodType){
         const t=this;
-        let type={id:t.addId++,label:woodType,sum:0,big:0,little:0 ,medium:0 , children: [ {id:t.addId++,label:'小',children:[],unRepe:{}} ]}
+        let type={id:t.addId++,label:woodType,sum:0,big:0,little:0 ,medium:0 , children: [ {id:t.addId++,label:'小',children:[],unRepe:{type:['小',0,0]}} ]}
         //  newType={...type.children[0] }; //创建新的类型 浅拷贝这一层
        let newType=this.clone(type.children[0])
         //有中的话就执行全部 ，小是默认执行
         switch(typeNub){
-          case 2:  let newTypes=this.clone(type.children[0]);newTypes.label='中';newTypes.id= t.addId++; type.children.push({...newTypes});
-          case 1:  newType.label='大';newType.id= t.addId++; type.children.push({...newType}); break; 
+          case 2:  let newTypes=this.clone(type.children[0]);newTypes.unRepe.type[0]='中'; newTypes.label=newTypes.unRepe.type[0];
+          newTypes.id= t.addId++; type.children.push({...newTypes});
+          case 1: newType.unRepe.type[0]='大'; newType.label=newType.unRepe.type[0]; newType.id= t.addId++; type.children.push({...newType}); break; 
         }
         console.log("type:",type)
         return type 
       },  
       /** 木头类型位置['杂木','樟木',...] */
-      woodTIndex(){ let type=[]; this.wood.forEach(v => { type.push(v.type) });  return type }, 
+      woodTIndex(){ let type=[]; this.wood.forEach(v => { type.push(v.type) });  return type}, 
 
       /** 删除 */
-      remove(node, data,e){  
+      remove(node, data){  
         console.log("删除",data.label);
+        //当删除了木头整个组就恢复添加木材选项
         if(this.woodTIndex().indexOf(data.label)>-1){ 
           let key=this.woodTIndex().indexOf(data.label)
           this.wood[key].statu=false;  
-        } //打开开关  
-        this.showgroup="";
-        // this.little=0 ;this.medium=0 ;this.big=0 ;this.sum=0 
+        } //打开开关 
         const parent = node.parent;
+        if(data.label.length>1){ 
+        let deletKey=data.label.split(' 根')[0]
+      
+        console.log('删除时候返回的对象',data)
+        console.log('删除parent.data',parent.data)  
+        console.log('删除parent',parent.data.unRepe[deletKey]) 
+        let getDeletKey=parent.data.unRepe[deletKey] //提取删除的值数据
+        let [num,univalence]=[getDeletKey.num,getDeletKey.univalence]
+        let type=parent.data.unRepe.type //返回的值为木头属性材积 
+        let res= +(num*univalence).toFixed(3);//type[1] ：规格大小的结果  type[0]//大小
+        //删除对应的规格木头
+        switch(type[0]){
+          case '小':this.clickWood.little=+(this.clickWood.little-res).toFixed(3); break;
+          case '大': this.clickWood.big= +(this.clickWood.big-res).toFixed(3);break;
+          default: this.clickWood.medium=+(this.clickWood.medium-res).toFixed(3);break;
+        } 
+
+        console.log('删除时候当前的点击的木头总价', res)
+        this.clickWood.sum=+((this.clickWood.big+this.clickWood.little+this.clickWood.medium)*type[1]).toFixed(3);  
+
+        this.little=this.clickWood.little;
+        this.big=this.clickWood.big;
+        this.medium=this.clickWood.medium;
+        this.sum=this.clickWood.sum;
         const children = parent.data.children || parent.data;
         const index = children.findIndex(d => d.id === data.id);
-        children.splice(index, 1);  
-        window.event? window.event.cancelBubble = true : e.stopPropagation();
+        console.log('当前id',index)
+        delete parent.data.unRepe[deletKey] //删除检测重复属性 
+        children.splice(index, 1);//删除展示数据属性  
+        }
+        window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
       },
       /**选择类型 */
       selectType(v,D){
@@ -238,25 +266,26 @@ export default {
         if(v=="樟木"){
           if (D >= 30){ m=1500;  n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3)) ;s=2 }
           else if (D >= 20 ){ m=1000 ;n=+(this.medium+this.valeData()) ; this.medium=+(n.toFixed(3)); s=1 }
-          else {m=600 ; n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3));  }
+          else {m=600 ; n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3));}
         }
         else if(v=="苦楝木"){
-          if(D>=20) {m=600 ;n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3));s=1}
+          if(D>=20){m=600 ;n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3));s=1}
           else {m=500;n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3))}
           
         }else{
           m=500;n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3));
         } 
-        return {m,n,s}
+        return {m,n,s}// m:判断类别材积的值
        
       },
-      /** 计算单价 */
+      /** 计算单根材积 */
       valeData(){ return +(woodcalcu(this.L,this.D)*this.nubValue).toFixed(3);   },
       /** 组运算结果 */
       addSum:function(v){
         let [multiple=1]=[+v]
         let sum=Number(this.little+this.medium+this.big)*multiple
-        return this.sum=sum.toFixed(3)
+        
+        return this.sum=+sum.toFixed(3)
       },
       /** 警告添加木材*/
       open_warn(v) { this.$message({ message: v, type: 'warning' }); },
@@ -264,48 +293,49 @@ export default {
       clone(obj) { return JSON.parse(JSON.stringify(obj)); } 
   } 
 };
-//重置四舍六入无成双 ，为四舍五入
-Number.prototype.toFixed=function (d) { 
-    var s=this+""; 
-    if(!d)d=0; 
-    if(s.indexOf(".")==-1)s+="."; 
-    s+=new Array(d+1).join("0"); 
-    if(new RegExp("^(-|\\+)?(\\d+(\\.\\d{0,"+(d+1)+"})?)\\d*$").test(s)){
-        var s="0"+RegExp.$2,pm=RegExp.$1,a=RegExp.$3.length,b=true;
-        if(a==d+2){
-            a=s.match(/\d/g); 
-            if(parseInt(a[a.length-1])>4){
-                for(var i=a.length-2;i>=0;i--){
-                    a[i]=parseInt(a[i])+1;
-                    if(a[i]==10){
-                        a[i]=0;
-                        b=i!=1;
-                    }else break;
-                }
-            }
-            s=a.join("").replace(new RegExp("(\\d+)(\\d{"+d+"})\\d$"),"$1.$2");
 
-        }if(b)s=s.substr(1); 
-        return (pm+s).replace(/\.$/,"");
-    }return this+"";
+/**重置四舍六入无成双 ，为四舍五入 */
+  Number.prototype.toFixed=function (d) { 
+      var s=this+""; 
+      if(!d)d=0; 
+      if(s.indexOf(".")==-1)s+="."; 
+      s+=new Array(d+1).join("0"); 
+      if(new RegExp("^(-|\\+)?(\\d+(\\.\\d{0,"+(d+1)+"})?)\\d*$").test(s)){
+          var s="0"+RegExp.$2,pm=RegExp.$1,a=RegExp.$3.length,b=true;
+          if(a==d+2){
+              a=s.match(/\d/g); 
+              if(parseInt(a[a.length-1])>4){
+                  for(var i=a.length-2;i>=0;i--){
+                      a[i]=parseInt(a[i])+1;
+                      if(a[i]==10){
+                          a[i]=0;
+                          b=i!=1;
+                      }else break;
+                  }
+              }
+              s=a.join("").replace(new RegExp("(\\d+)(\\d{"+d+"})\\d$"),"$1.$2");
 
-}; 
+          }if(b)s=s.substr(1); 
+          return (pm+s).replace(/\.$/,"");
+      }return this+"";
+
+  }; 
 /**
  * L:长m,D:直径cm
  * _nub: 数量 
  */
- function  woodcalcu(L,D,_nub){
-        let V=0; 
-        if(D>4&&D<=12&&L>=2&&L<10){ 
-          let dl = (D + 0.45 * L + 0.2) ** 2 ;V = 0.7854 * L * dl / 10 ** 4; 
-        }
-        else if(D>=14&&L>=2&&L<10){ 
-          V = 0.7854 * L * [D + 0.5 * L + 0.005 * (L**2) + 0.000125 * L * ((14 - L)**2) * (D - 10)] ** 2 / 10000 
-        }
-        else{ V = 0.8 * L * (D + 0.5 * L) ** 2/10**4 }
-        V=V.toFixed(3)//4舍5入
-        return +V; 
-        }
+  function  woodcalcu(L,D,_nub){
+      let V=0; 
+      if(D>4&&D<=12&&L>=2&&L<10){ 
+        let dl = (D + 0.45 * L + 0.2) ** 2 ;V = 0.7854 * L * dl / 10 ** 4; 
+      }
+      else if(D>=14&&L>=2&&L<10){ 
+        V = 0.7854 * L * [D + 0.5 * L + 0.005 * (L**2) + 0.000125 * L * ((14 - L)**2) * (D - 10)] ** 2 / 10000 
+      }
+      else{ V = 0.8 * L * (D + 0.5 * L) ** 2/10**4 }
+      V=V.toFixed(3)//4舍5入
+      return +V; 
+    }
 /**解决精度 */
   Math.formatFloat = function (nub, multiple) {
     let deci = nub.toString().split('.')[1].length
