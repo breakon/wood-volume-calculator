@@ -116,7 +116,7 @@ export default {
         default: alert('数据异常')
         }
       } 
-      //取出切换的
+      //取出切换的值  
       let tree=this.clickWood
       this.little=tree.little;
       this.medium=tree.medium;
@@ -178,13 +178,15 @@ export default {
       let typeSize=this.selectType(this.showgroup,this.D)
       let multiple=typeSize.m //判断木头种类返回的值是多少 
       let sum=+(Number(this.little+this.medium+this.big)*multiple).toFixed(3) 
-      this.sum =+(this.sum+sum).toFixed(3)
+      this.sum =+(sum).toFixed(3)
       this.append(typeSize.s,typeSize.m)//添加的木材表对应节点 . 存储乘积结果
       //同步计算结果
+      // debugger
       this.clickWood.little=+this.little; 
       this.clickWood.medium=+this.medium;
       this.clickWood.big=+this.big;
       this.clickWood.sum=+this.sum; 
+      // debugger
       },
       /** 添加 */
       append(res,productNum) { 
@@ -201,17 +203,18 @@ export default {
                 arrRepe.splice(i,1)  ;break; 
              }//删除重复
            }  
-          strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${this.valeData()} `
+          strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${unRepe[nowLxD].univalence} `
           let newChild ={ id:oldVal ,label:strLable  }
            console.log(newChild)
           this.clickWood.children[typeSize].children.push(newChild);
         }else{ 
           console.log('新的值newUnRepe',this.nubValue)
-          unRepe[nowLxD]={ num: this.nubValue, univalence: this.valeData() } //创建一个记录重复值的对象 
-          strLable=`${nowLxD} 根:${this.nubValue} 材积:${this.valeData()} `
+          unRepe[nowLxD]={ num: this.nubValue, univalence:woodcalcu(this.L,this.D) } //创建一个记录重复值的对象 
+          strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${unRepe[nowLxD].univalence} `
           let newChild ={ id: this.addId++,label:strLable  }
+          unRepe.type[1]=productNum;//保存类型乘积数 
+          debugger;
           this.clickWood.children[typeSize].children.push(newChild);
-          unRepe.type[1]=productNum;//保存类型乘积数
         }
       }, 
       /** 初始化添加木头类型 0小 2中 1大 */
@@ -247,28 +250,30 @@ export default {
           let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
           let type=parent.data.unRepe.type //返回的值为木头属性材积 
           let res= +(num*univalence).toFixed(3);//type[1] ：规格大小的结果  type[0]//大小
+          debugger
           //删除对应的规格木头
           switch(type[0]){
             case '小':this.clickWood.little=+(this.clickWood.little-res).toFixed(3); break;
-            case '大': this.clickWood.big= +(this.clickWood.big-res).toFixed(3);break;
+            case '大': this.clickWood.big=+(this.clickWood.big-res).toFixed(3);break;
             default: this.clickWood.medium=+(this.clickWood.medium-res).toFixed(3);break;
           }  
           console.log('删除时候当前的点击的木头总价', res)
           this.clickWood.sum=+((this.clickWood.big+this.clickWood.little+this.clickWood.medium)*type[1]).toFixed(3);   
           this.little=+(+this.clickWood.little).toFixed(3); this.big=+this.clickWood.big;
           this.medium=+this.clickWood.medium;               this.sum=+(+this.clickWood.sum).toFixed(3);
+          debugger
+
           delete parent.data.unRepe[deletKey] //删除检测重复属性 
+          debugger;
         }else{
         this.little=0,
          this.medium=0,
          this.big=0,
          this.sum=0;
          this.showgroup=""
-        }   
-        
+        }    
         const children = parent.data.children || parent.data;
-        const index = children.findIndex(d => d.id === data.id);
-        console.log('当前id',index)
+        const index = children.findIndex(d => d.id === data.id); 
         children.splice(index, 1);//删除展示数据属性    
        
         //当删除了木头整个组就恢复添加木材选项
