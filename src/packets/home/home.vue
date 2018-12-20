@@ -2,10 +2,10 @@
   <div class="home">
     <nav>
     <div class="header">
-      <center> 材积表计算 </center>
-    <!-- <div class="share-top">
-    分享
-    </div> -->
+      <div class="header-top" style="">材积表计算 </div> 
+    <div class="share-top">
+    关于
+    </div>
     </div> 
     </nav>
      <main style="height:100%">
@@ -99,12 +99,7 @@ export default {
       ],
     }
   },
-  //  computed:{
-  //    sum:function(v1,v2){  
-  //      console.log('计算属性 run ok' ,v1,v2) 
-  //     //  return v1+1
-  //    }
-  //   },
+   
    watch:{
       showgroup:function(newVal, oldVal){
         console.log("show:",newVal)
@@ -175,7 +170,11 @@ export default {
 
       /** 运算*/
       calculations:function(){  
-      if(this.showgroup==""){this.open_warn('请选择木材'); return false}  
+      if(this.showgroup==""){this.open_warn('请选择木材'); return false}
+       if(this.nubValue<=0){  
+         this.open_warn('至少数量为1');
+         this.nubValue=1;
+       }
       let typeSize=this.selectType(this.showgroup,this.D)
       let multiple=typeSize.m //判断木头种类返回的值是多少 
       let sum=+(Number(this.little+this.medium+this.big)*multiple).toFixed(3) 
@@ -373,7 +372,11 @@ export default {
   top:0px
   z-index 999 
 .share-top
-  float :right
+  position: fixed;
+  top: 5px;
+  right: 5px
+  font-size: 14px;
+
 
 .select-wood
   background: #cbe9ec  !important;
@@ -417,4 +420,11 @@ export default {
 .el-message{
    top: 110px;
 }
+.header-top{
+    margin: auto;
+    width: 100%;
+    text-align: center;
+    line-height: 1.9;
+}
+
 </style>
