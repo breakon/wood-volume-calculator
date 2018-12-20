@@ -19,7 +19,8 @@
           添加木材<i class="el-icon-arrow-down el-icon--right"></i>
         </span>
         <el-dropdown-menu   slot="dropdown">  
-          <el-dropdown-item v-for="( item ,key,index )  in wood "  :key="index" :disabled="item.statu"     :command='item.type'>{{item.type}}</el-dropdown-item>   
+          <el-dropdown-item v-for="( item ,key,index )  in wood "  :key="index" :disabled="item.statu"    
+           :command='item.type'>{{item.type}}</el-dropdown-item>   
         </el-dropdown-menu>
       </el-dropdown>
       </div>
@@ -29,8 +30,8 @@
       <el-tree :data="data" ref="tree" :props="defaultProps" node-key="id" @node-click="handleNodeClick"> 
         <span class="custom-tree-node" slot-scope="{ node, data }">
           <span>{{ node.label }}</span>
-          <span> 
-            <el-button type="text" size="mini" @click="() => remove(node, data)"> 删除</el-button>
+          <span  v-show="showDelete(node.label)">  
+            <el-button  type="text" size="mini" @click="() => remove(node, data)"> 删除</el-button>
           </span>
         </span> 
       </el-tree> 
@@ -136,13 +137,25 @@ export default {
          console.clear() ; console.log("command",command);
          const t=this; let wood=t.wood;  
          switch(command){
-          case wood[0].type: wood[0].tree=this.initWoddType(0,command);t.data.push(wood[0].tree) ;wood[0].statu=true; break;//杂木 initWoddType 0默认为小
-          case wood[1].type: wood[1].tree=this.initWoddType(2,command);t.data.push(wood[1].tree) ;wood[1].statu=true; break;//樟木              2是全部类型
-          case wood[2].type: wood[2].tree=this.initWoddType(1,command);t.data.push(wood[2].tree) ;wood[2].statu=true; break;//苦楝木              1是大
+          case wood[0].type: wood[0].tree=this.initWoddType(0,command);t.data.push(wood[0].tree) ;wood[0].statu=true;
+          break;//杂木 initWoddType 0默认为小
+          case wood[1].type: wood[1].tree=this.initWoddType(2,command);t.data.push(wood[1].tree) ;wood[1].statu=true; 
+          break;//樟木              2是全部类型
+          case wood[2].type: wood[2].tree=this.initWoddType(1,command);t.data.push(wood[2].tree) ;wood[2].statu=true; 
+          break;//苦楝木              1是大
           default: t.$message('当前木头信息尚未收集，等待开发');
          }  
          
-      },  
+      },
+      showDelete(v){
+         let boolean=true;
+        switch(v){
+          case '大': boolean=!boolean;  break; 
+          case '中': boolean=!boolean;  break; 
+          case '小': boolean=!boolean;  break; 
+        }
+        return boolean;
+      } ,
  
        /** 点击木材表树 返回对应点击的元素值*/
        handleNodeClick(data ,e ,vueComp ) { 
@@ -156,6 +169,7 @@ export default {
            this.showgroup=data.label; //点击的
            console.log( "handleNodeCilk",data);  
            this.clickWood=data
+           
         }  
       },
 
@@ -163,8 +177,9 @@ export default {
       calculations:function(){  
       if(this.showgroup==""){this.open_warn('请选择木材'); return false}  
       let typeSize=this.selectType(this.showgroup,this.D)
-      let multiple=typeSize.m //判断木头种类返回的值是多少  
-      this.addSum(multiple)
+      let multiple=typeSize.m //判断木头种类返回的值是多少 
+      let sum=+(Number(this.little+this.medium+this.big)*multiple).toFixed(3) 
+      this.sum =+(this.sum+sum).toFixed(3)
       this.append(typeSize.s,typeSize.m)//添加的木材表对应节点 . 存储乘积结果
       //同步计算结果
       this.clickWood.little=+this.little; 
@@ -187,14 +202,14 @@ export default {
                 arrRepe.splice(i,1)  ;break; 
              }//删除重复
            }  
-          strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 单价:${this.valeData()} ￥0`
+          strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${this.valeData()} `
           let newChild ={ id:oldVal ,label:strLable  }
            console.log(newChild)
           this.clickWood.children[typeSize].children.push(newChild);
         }else{ 
           console.log('新的值newUnRepe',this.nubValue)
           unRepe[nowLxD]={ num: this.nubValue, univalence: this.valeData() } //创建一个记录重复值的对象 
-          strLable=`${nowLxD} 根:${this.nubValue} 单价:${this.valeData()} ￥0`
+          strLable=`${nowLxD} 根:${this.nubValue} 材积:${this.valeData()} `
           let newChild ={ id: this.addId++,label:strLable  }
           this.clickWood.children[typeSize].children.push(newChild);
           unRepe.type[1]=productNum;//保存类型乘积数
@@ -202,15 +217,18 @@ export default {
       }, 
       /** 初始化添加木头类型 0小 2中 1大 */
       initWoddType(typeNub,woodType){
-        const t=this;
-        let type={id:t.addId++,label:woodType,sum:0,big:0,little:0 ,medium:0 , children: [ {id:t.addId++,label:'小',children:[],unRepe:{type:['小',0,0]}} ]}
+       const t=this;
+       let type={id:t.addId++,label:woodType,sum:0,big:0,little:0 ,medium:0 , children: [
+          {id:t.addId++,label:'小',children:[],unRepe:{type:['小',0,0]}} ]}
         //  newType={...type.children[0] }; //创建新的类型 浅拷贝这一层
        let newType=this.clone(type.children[0])
         //有中的话就执行全部 ，小是默认执行
         switch(typeNub){
-          case 2:  let newTypes=this.clone(type.children[0]);newTypes.unRepe.type[0]='中'; newTypes.label=newTypes.unRepe.type[0];
-          newTypes.id= t.addId++; type.children.push({...newTypes});
-          case 1: newType.unRepe.type[0]='大'; newType.label=newType.unRepe.type[0]; newType.id= t.addId++; type.children.push({...newType}); break; 
+          case 2:  let newTypes=this.clone(type.children[0]);newTypes.unRepe.type[0]='中'; 
+          newTypes.label=newTypes.unRepe.type[0]; newTypes.id= t.addId++; type.children.push({...newTypes});
+
+          case 1: newType.unRepe.type[0]='大'; newType.label=newType.unRepe.type[0]; newType.id= t.addId++;
+           type.children.push({...newType}); break; 
         }
         console.log("type:",type)
         return type 
@@ -221,42 +239,44 @@ export default {
       /** 删除 */
       remove(node, data){  
         console.log("删除",data.label);
-        //当删除了木头整个组就恢复添加木材选项
-        if(this.woodTIndex().indexOf(data.label)>-1){ 
-          let key=this.woodTIndex().indexOf(data.label)
-          this.wood[key].statu=false;  
-        } //打开开关 
-        const parent = node.parent;
-        if(data.label.length>1){ 
-        let deletKey=data.label.split(' 根')[0]
-      
-        console.log('删除时候返回的对象',data)
-        console.log('删除parent.data',parent.data)  
-        console.log('删除parent',parent.data.unRepe[deletKey]) 
-        let getDeletKey=parent.data.unRepe[deletKey] //提取删除的值数据
-        let [num,univalence]=[getDeletKey.num,getDeletKey.univalence]
-        let type=parent.data.unRepe.type //返回的值为木头属性材积 
-        let res= +(num*univalence).toFixed(3);//type[1] ：规格大小的结果  type[0]//大小
-        //删除对应的规格木头
-        switch(type[0]){
-          case '小':this.clickWood.little=+(this.clickWood.little-res).toFixed(3); break;
-          case '大': this.clickWood.big= +(this.clickWood.big-res).toFixed(3);break;
-          default: this.clickWood.medium=+(this.clickWood.medium-res).toFixed(3);break;
-        } 
-
-        console.log('删除时候当前的点击的木头总价', res)
-        this.clickWood.sum=+((this.clickWood.big+this.clickWood.little+this.clickWood.medium)*type[1]).toFixed(3);  
-
-        this.little=this.clickWood.little;
-        this.big=this.clickWood.big;
-        this.medium=this.clickWood.medium;
-        this.sum=this.clickWood.sum;
+        if(!confirm("是否删除")){  return false  }
+        const parent = node.parent; //点击的上一级对象 
+        let lableKey=data.label.split(' 根') 
+        let deletKey=lableKey[0]
+        if(lableKey[1] !== undefined){  
+          let getDeletKey=parent.data.unRepe[deletKey]    //提取删除的值数据
+          let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
+          let type=parent.data.unRepe.type //返回的值为木头属性材积 
+          let res= +(num*univalence).toFixed(3);//type[1] ：规格大小的结果  type[0]//大小
+          //删除对应的规格木头
+          switch(type[0]){
+            case '小':this.clickWood.little=+(this.clickWood.little-res).toFixed(3); break;
+            case '大': this.clickWood.big= +(this.clickWood.big-res).toFixed(3);break;
+            default: this.clickWood.medium=+(this.clickWood.medium-res).toFixed(3);break;
+          }  
+          console.log('删除时候当前的点击的木头总价', res)
+          this.clickWood.sum=+((this.clickWood.big+this.clickWood.little+this.clickWood.medium)*type[1]).toFixed(3);   
+          this.little=+(+this.clickWood.little).toFixed(3); this.big=+this.clickWood.big;
+          this.medium=+this.clickWood.medium;               this.sum=+(+this.clickWood.sum).toFixed(3);
+          delete parent.data.unRepe[deletKey] //删除检测重复属性 
+        }else{
+        this.little=0,
+         this.medium=0,
+         this.big=0,
+         this.sum=0;
+         this.showgroup=""
+        }   
+        
         const children = parent.data.children || parent.data;
         const index = children.findIndex(d => d.id === data.id);
         console.log('当前id',index)
-        delete parent.data.unRepe[deletKey] //删除检测重复属性 
-        children.splice(index, 1);//删除展示数据属性  
-        }
+        children.splice(index, 1);//删除展示数据属性    
+       
+        //当删除了木头整个组就恢复添加木材选项
+        if(this.woodTIndex().indexOf(data.label)>-1){ 
+          let key=this.woodTIndex().indexOf(data.label); this.wood[key].statu=false; 
+         } //打开开关 
+
         window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
       },
       /**选择类型 */
@@ -278,15 +298,9 @@ export default {
         return {m,n,s}// m:判断类别材积的值
        
       },
+    
       /** 计算单根材积 */
-      valeData(){ return +(woodcalcu(this.L,this.D)*this.nubValue).toFixed(3);   },
-      /** 组运算结果 */
-      addSum:function(v){
-        let [multiple=1]=[+v]
-        let sum=Number(this.little+this.medium+this.big)*multiple
-        
-        return this.sum=+sum.toFixed(3)
-      },
+      valeData(){ return +(woodcalcu(this.L,this.D)*this.nubValue).toFixed(3);   }, 
       /** 警告添加木材*/
       open_warn(v) { this.$message({ message: v, type: 'warning' }); },
       /** 深拷贝*/
@@ -400,5 +414,7 @@ export default {
     padding: 10px 0;
     background-color: #f9fafc;
   }
-
+.el-message{
+   top: 110px;
+}
 </style>
