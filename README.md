@@ -7,7 +7,9 @@ web技术发展迅速，敏捷，发现身边没有好的一款为木头测量�
 制作的初衷为了我父亲做的，让他在测量后计算价格方便，程序标准是依照我父亲标准设定的，
 如果制作有偏差，设计有缺陷，中肯的改进都可以和我联系，我好改进
 
+## 计算器链接
 https://breakon.github.io/wood-volume-calculator/index
+
 安装
 ## Build Setup
 
