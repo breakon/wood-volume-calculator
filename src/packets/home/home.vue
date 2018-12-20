@@ -163,8 +163,7 @@ export default {
           vueComp.$el.childNodes[0].className +=" select-wood"  
            this.showgroup=data.label; //点击的
            console.log( "handleNodeCilk",data);  
-           this.clickWood=data
-           
+           this.clickWood=data 
         }  
       },
 
@@ -180,13 +179,11 @@ export default {
       let sum=+(Number(this.little+this.medium+this.big)*multiple).toFixed(3) 
       this.sum =+(sum).toFixed(3)
       this.append(typeSize.s,typeSize.m)//添加的木材表对应节点 . 存储乘积结果
-      //同步计算结果
-      // debugger
+      //同步计算结果 
       this.clickWood.little=+this.little; 
       this.clickWood.medium=+this.medium;
       this.clickWood.big=+this.big;
-      this.clickWood.sum=+this.sum; 
-      // debugger
+      this.clickWood.sum=+this.sum;  
       },
       /** 添加 */
       append(res,productNum) { 
@@ -212,8 +209,7 @@ export default {
           unRepe[nowLxD]={ num: this.nubValue, univalence:woodcalcu(this.L,this.D) } //创建一个记录重复值的对象 
           strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${unRepe[nowLxD].univalence} `
           let newChild ={ id: this.addId++,label:strLable  }
-          unRepe.type[1]=productNum;//保存类型乘积数 
-          debugger;
+          unRepe.type[1]=productNum;//保存类型乘积数  
           this.clickWood.children[typeSize].children.push(newChild);
         }
       }, 
@@ -249,8 +245,7 @@ export default {
           let getDeletKey=parent.data.unRepe[deletKey]    //提取删除的值数据
           let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
           let type=parent.data.unRepe.type //返回的值为木头属性材积 
-          let res= +(num*univalence).toFixed(3);//type[1] ：规格大小的结果  type[0]//大小
-          debugger
+          let res= +(num*univalence).toFixed(3);//type[1] ：规格大小的结果  type[0]//大小 
           //删除对应的规格木头
           switch(type[0]){
             case '小':this.clickWood.little=+(this.clickWood.little-res).toFixed(3); break;
@@ -260,17 +255,11 @@ export default {
           console.log('删除时候当前的点击的木头总价', res)
           this.clickWood.sum=+((this.clickWood.big+this.clickWood.little+this.clickWood.medium)*type[1]).toFixed(3);   
           this.little=+(+this.clickWood.little).toFixed(3); this.big=+this.clickWood.big;
-          this.medium=+this.clickWood.medium;               this.sum=+(+this.clickWood.sum).toFixed(3);
-          debugger
+          this.medium=+this.clickWood.medium;               this.sum=+(+this.clickWood.sum).toFixed(3); 
 
-          delete parent.data.unRepe[deletKey] //删除检测重复属性 
-          debugger;
+          delete parent.data.unRepe[deletKey] //删除检测重复属性  
         }else{
-        this.little=0,
-         this.medium=0,
-         this.big=0,
-         this.sum=0;
-         this.showgroup=""
+        this.little=0, this.medium=0, this.big=0, this.sum=0; this.showgroup=""
         }    
         const children = parent.data.children || parent.data;
         const index = children.findIndex(d => d.id === data.id); 
@@ -286,25 +275,23 @@ export default {
       /**选择类型 */
       selectType(v,D){
         console.log(v,D)
-        let[ m,n,s]=[0,0,0] 
-        if(v=="樟木"){
-          if (D >= 30){ m=1500;  n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3)) ;s=2 }
-          else if (D >= 20 ){ m=1000 ;n=+(this.medium+this.valeData()) ; this.medium=+(n.toFixed(3)); s=1 }
-          else {m=600 ; n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3));}
+        let[ m,n,s]=[0,"",0] 
+        if(v==this.wood[1]){
+          if (D >= 30){ m=1500;  n='big';s=2 }
+          else if (D >= 20 ){ m=1000 ;n='medium' ;s=1 }
+          else {m=600 ; n='little' ;}
         }
-        else if(v=="苦楝木"){
-          if(D>=20){m=600 ;n=+(this.big+this.valeData()) ; this.big=+(n.toFixed(3));s=1}
-          else {m=500;n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3))}
-          
-        }else{
-          m=500;n=+(this.little+this.valeData()) ; this.little=+(n.toFixed(3));
-        } 
-        return {m,n,s}// m:判断类别材积的值
+        else if(v==this.wood[2]){
+          if(D>=20){m=600 ;n='big' ; s=1}
+          else {m=500;n='little' ;}
+        }else{ m=500;n='little' ; } 
+
+        this[n]=+((this[n]+woodcalcu(this.L,this.D))*this.nubValue).toFixed(3)
+        // debugger;
+        return {m,s}// m:判断类别材积的值
        
       },
-    
-      /** 计算单根材积 */
-      valeData(){ return +(woodcalcu(this.L,this.D)*this.nubValue).toFixed(3);   }, 
+     
       /** 警告添加木材*/
       open_warn(v) { this.$message({ message: v, type: 'warning' }); },
       /** 深拷贝*/
