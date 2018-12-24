@@ -20,7 +20,7 @@
         </span>
         <el-dropdown-menu   slot="dropdown">  
           <el-dropdown-item v-for="( item ,key,index )  in wood "  :key="index" :disabled="item.statu"    
-           :command='item.type'>{{item.type}}</el-dropdown-item>   
+           :command='item.name'>{{item.name}}</el-dropdown-item>   
         </el-dropdown-menu>
       </el-dropdown>
       </div>
@@ -41,7 +41,7 @@
      <div class="input-box">
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span>总额 ：{{clickWood.sum}} </span>  
+        <span>总额 ：{{showSum}} </span>  
       </div> 
       <div @click="calculations"  class="text item">
         <div v-bind:class="{ opacityfont:isOpacity[0]}" >小：<span >{{little}}</span></div>
@@ -89,13 +89,15 @@ export default {
       defaultProps: { children: 'children', label: 'label' },
       addId:0, //增加的树id 
       clickWood:[],//点击的数组
-      showgroup:"", 
+      showgroup:"",
+      showSum:0,
       wood:[
-      {type:'杂木',statu:false,tree:{}}, //tree返回的值放入data对应的数据展示
-      {type:'樟木',statu:false,tree:{}},
-      {type:'苦楝木',statu:false,tree:{}},
-      {type:'春芽木',statu:false,tree:{}},
-      {type:'其他木',statu:false,tree:{}}
+        // size ：从小到大
+      {name:'杂木' , size:[{d:-1,m:500,s:0,n:'little'}],statu:false,tree:{}}, //tree返回的值放入data对应的数据展示
+      {name:'樟木' , size:[{d:-1,m:600,s:0,n:'little'},{d:20,m:1000,s:1,n:'medium'},{d:30,m:1500,s:2,n:'big'}],statu:false,tree:{}},
+      {name:'苦楝木',size:[{d:-1,m:500,s:0,n:'little'},{d:20,m:600,s:1,n:'big'}],statu:false,tree:{}},
+      {name:'春芽木',statu:false,tree:{}},
+      {name:'其他木',statu:false,tree:{}}
       ],
     }
   },
@@ -123,7 +125,17 @@ export default {
       this.big= tree.big
       this.sum= tree.sum
       return this.showgroup
-      }
+      },
+      // sum(){
+      //  let sum1=0; 
+      //   this.data.forEach((v)=>{
+      //      sum1+=v.sum
+      //      console.log("sum1",sum1)
+      //   }) 
+        
+      //   console.log(this.showSum=sum1)
+      //   return this.showSum=sum1;
+      // }
     } ,
    
   methods:{  
@@ -132,11 +144,11 @@ export default {
          console.clear() ; console.log("command",command);
          const t=this; let wood=t.wood;  
          switch(command){
-          case wood[0].type: wood[0].tree=this.initWoddType(0,command);t.data.push(wood[0].tree) ;wood[0].statu=true;
+          case wood[0].name: wood[0].tree=this.initWoddType(0,command);t.data.push(wood[0].tree) ;wood[0].statu=true;
           break;//杂木 initWoddType 0默认为小
-          case wood[1].type: wood[1].tree=this.initWoddType(2,command);t.data.push(wood[1].tree) ;wood[1].statu=true; 
+          case wood[1].name: wood[1].tree=this.initWoddType(2,command);t.data.push(wood[1].tree) ;wood[1].statu=true; 
           break;//樟木              2是全部类型
-          case wood[2].type: wood[2].tree=this.initWoddType(1,command);t.data.push(wood[2].tree) ;wood[2].statu=true; 
+          case wood[2].name: wood[2].tree=this.initWoddType(1,command);t.data.push(wood[2].tree) ;wood[2].statu=true; 
           break;//苦楝木              1是大
           default: t.$message('当前木头信息尚未收集，等待开发');
          }  
@@ -170,20 +182,38 @@ export default {
       /** 运算*/
       calculations:function(){  
       if(this.showgroup==""){this.open_warn('请选择木材'); return false}
-       if(this.nubValue<=0){  
-         this.open_warn('至少数量为1');
-         this.nubValue=1;
-       }
-      let typeSize=this.selectType(this.showgroup,this.D)
-      let multiple=typeSize.m //判断木头种类返回的值是多少 
-      let sum=+(Number(this.little+this.medium+this.big)*multiple).toFixed(3) 
-      this.sum =+(sum).toFixed(3)
+      if(this.nubValue<=0){this.open_warn('至少数量为1'); this.nubValue=1; }
+      let typeSize=this.selectType(this.showgroup,this.D) //选择木头种类
+      // debugger
+      
+      this[typeSize.n]=+(this[typeSize.n]+woodcalcu(this.L,this.D)*this.nubValue).toFixed(3) //单算
+      //判断木头种类返回的值是多少 
+      let sum=+(Number(this.little+this.medium+this.big)*typeSize.m).toFixed(3) //总算
+      this.sum =+sum.toFixed(3)
+      
       this.append(typeSize.s,typeSize.m)//添加的木材表对应节点 . 存储乘积结果
+      
+      this.$message({
+          message: `填写的值为${this.L} X ${this.D} 数量为：${this.nubValue}`,
+          showClose: true,
+          // duration:0,
+          type: 'success'
+        });
       //同步计算结果 
       this.clickWood.little=+this.little; 
       this.clickWood.medium=+this.medium;
       this.clickWood.big=+this.big;
-      this.clickWood.sum=+this.sum;  
+      this.clickWood.sum=+this.sum;   
+      this.nubValue=1;
+      // debugger
+      // var checkSum=0;
+      // for(let a in data.children[0].unRepe) { 
+      // if('type'!==a)	{console.log(data.children[0].unRepe[a])
+      // checkSum+=data.children[0].unRepe[a].num*data.children[0].unRepe[a].univalence
+
+      // }
+
+      // }
       },
       /** 添加 */
       append(res,productNum) { 
@@ -232,7 +262,7 @@ export default {
         return type 
       },  
       /** 木头类型位置['杂木','樟木',...] */
-      woodTIndex(){ let type=[]; this.wood.forEach(v => { type.push(v.type) });  return type}, 
+      woodTIndex(){ let type=[]; this.wood.forEach(v => { type.push(v.name) });  return type}, 
 
       /** 删除 */
       remove(node, data){  
@@ -254,9 +284,9 @@ export default {
           }  
           console.log('删除时候当前的点击的木头总价', res)
           this.clickWood.sum=+((this.clickWood.big+this.clickWood.little+this.clickWood.medium)*type[1]).toFixed(3);   
-          this.little=+(+this.clickWood.little).toFixed(3); this.big=+this.clickWood.big;
-          this.medium=+this.clickWood.medium;               this.sum=+(+this.clickWood.sum).toFixed(3); 
-
+          this.little=+(this.clickWood.little).toFixed(3); this.big=+(this.clickWood.big).toFixed(3);
+          this.medium=+(this.clickWood.medium).toFixed(3);  this.sum=+(this.clickWood.sum).toFixed(3); 
+          debugger;
           delete parent.data.unRepe[deletKey] //删除检测重复属性  
         }else{
         this.little=0, this.medium=0, this.big=0, this.sum=0; this.showgroup=""
@@ -272,28 +302,51 @@ export default {
 
         window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
       },
+
       /**选择类型 */
       selectType(v,D){
         console.log(v,D)
         let[ m,n,s]=[0,"",0] 
-        if(v==this.wood[1]){
+        // this.wood.map((arr)=>{ 
+        //   // 寻找木头
+        //   if(v==arr.name){ 
+        //     // 寻找尺寸相关数据 
+        //     // debugger;
+        //       if (arr.size[2]&&D>=arr.size[2].d&&arr.size.length>1){
+        //         m=arr.size[2].m ;s=arr.size[2].s; n=arr.size[2].n; 
+        //       }
+        //       else if(arr.size[1]&&D>=arr.size[1].d&&arr.size.length==3){
+        //         m=arr.size[1].m ;s=arr.size[1].s; n=arr.size[1].n;
+        //       }else{
+        //         m=arr.size[0].m ;s=arr.size[0].s; n=arr.size[0].n;
+        //       }  
+        //     }
+            
+        //  }) 
+         
+        if(v==this.wood[1].name){
+          // 樟木
           if (D >= 30){ m=1500;  n='big';s=2 }
           else if (D >= 20 ){ m=1000 ;n='medium' ;s=1 }
-          else {m=600 ; n='little' ;}
+          else {m=600 ; n='little';}
         }
-        else if(v==this.wood[2]){
+        // 苦楝木
+        else if(v==this.wood[2].name){
           if(D>=20){m=600 ;n='big' ; s=1}
-          else {m=500;n='little' ;}
-        }else{ m=500;n='little' ; } 
-
-        this[n]=+((this[n]+woodcalcu(this.L,this.D))*this.nubValue).toFixed(3)
+          else {m=500;n='little';}
+        }
+        //杂木
+        else{ m=500;n='little' ; } 
+ 
         // debugger;
-        return {m,s}// m:判断类别材积的值
+        // m:判断类别材积的值
        
+        //  debugger;
+            return {m,s,n}
       },
      
       /** 警告添加木材*/
-      open_warn(v) { this.$message({ message: v, type: 'warning' }); },
+      open_warn(v) { this.$message({ message: v,  showClose: true, type: 'warning' }); },
       /** 深拷贝*/
       clone(obj) { return JSON.parse(JSON.stringify(obj)); } 
   } 
@@ -410,7 +463,8 @@ export default {
     background-color: #f9fafc;
   }
 .el-message{
-   top: 110px;
+   top:0px;
+  height: 30px;
 }
 .header-top{
     margin: auto;
