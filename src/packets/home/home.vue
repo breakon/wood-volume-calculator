@@ -335,7 +335,7 @@ export default {
 /** 解决精度 */
   Number.prototype.newTofixed = function (n) { 
     // arguments[0]
-    if(!n) {return this.valueOf() }//为空就返回值本身
+    if(!n ||this.toString().split('.').length===1) {return this.valueOf() }//为空就返回值本身
     else {
       let deci = this.toString().split('.')[1].length 
       let m = n||deci
