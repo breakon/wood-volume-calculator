@@ -102,7 +102,7 @@ export default {
    
    watch:{
       showgroup:function(newVal, oldVal){
-        console.log("show:",newVal)
+        //console.log("show:",newVal)
           // 找到了点击的树枝子节点
         let index=this.data.findIndex((value, index, arr) => {
           return value.label== this.showgroup
@@ -124,12 +124,12 @@ export default {
       this.sum= tree.sum
       return this.showgroup
       },
-      sum(){ let sum1=0; this.data.forEach((v)=>{ sum1+=v.sum;});  return this.showSum=+sum1.toFixed(3); } } ,
+      sum(){ let sum1=0; this.data.forEach((v)=>{ sum1+=v.sum;});  return this.showSum=+sum1.newTofixed(5); } } ,
    
   methods:{  
        /** 下拉框选择木材 */
        handleCommand(command ){ 
-         console.clear() ; console.log("command",command);
+         console.clear() ; //console.log("command",command);
          const t=this; let wood=t.wood;  let n=0,s=0;
          switch(command){
           case wood[0].name: n=0 ;     break;//杂木 initWoddType 0默认为小
@@ -160,7 +160,7 @@ export default {
           }
           vueComp.$el.childNodes[0].className +=" select-wood"  
            this.showgroup=data.label; //点击的
-           console.log( "handleNodeCilk",data);  
+           //console.log( "handleNodeCilk",data);  
            this.clickWood=data 
         }  
       },
@@ -182,7 +182,7 @@ export default {
         typemMone=typeSize[1].m;sizeSelct=typeSize[1].n;sizeAppendTree=1
         } //中 
       
-      this[sizeSelct]=+(this[sizeSelct]+woodcalcu(this.L,this.D)*this.nubValue).toFixed(3) //单算 
+      this[sizeSelct]=+(this[sizeSelct]+woodcalcu(this.L,this.D)*this.nubValue).newTofixed(3) //单算 
       
       //判断木头种类返回的值是多少 
       let [showNumType1,showNumType2,showNumType3]=[0,0,0];//选择对应尺寸乘积的价格
@@ -193,8 +193,8 @@ export default {
       this.little*typeSize[showNumType1].m
       +this.medium*typeSize[showNumType2].m
       +this.big*typeSize[showNumType3].m
-      )).toFixed(3) //总算
-      this.sum =+sum.toFixed(3) 
+      )).newTofixed(3) //总算
+      this.sum =+sum.newTofixed(3) 
       this.append(sizeAppendTree,typemMone)//添加的木材表对应节点 . 存储乘积结果
       
       this.$message({
@@ -216,7 +216,7 @@ export default {
         let [strLable,typeSize]=["",res]//0是小，以此类推 中 大 
         let  unRepe=this.clickWood.children[typeSize].unRepe;
         if(unRepe[nowLxD]){ 
-          //  console.clear(); console.log('重复值')
+          //  console.clear(); //console.log('重复值')
            unRepe[nowLxD].num=Number(unRepe[nowLxD].num+this.nubValue) //当前根数加上原来的根数 
             let arrRepe=this.clickWood.children[typeSize].children; let oldVal=0;
            for(let i=0;i<arrRepe.length;i++){ 
@@ -227,10 +227,10 @@ export default {
            }  
           strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${unRepe[nowLxD].univalence} `
           let newChild ={ id:oldVal ,label:strLable  }
-           console.log(newChild)
+           //console.log(newChild)
           this.clickWood.children[typeSize].children.push(newChild);
         }else{ 
-          console.log('新的值newUnRepe',this.nubValue)
+          //console.log('新的值newUnRepe',this.nubValue)
           unRepe[nowLxD]={ num: this.nubValue, univalence:woodcalcu(this.L,this.D) } //创建一个记录重复值的对象 
           strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${unRepe[nowLxD].univalence} `
           let newChild ={ id: this.addId++,label:strLable  }
@@ -252,7 +252,7 @@ export default {
           case 1: newType.unRepe.type[0]='大';newType.unRepe.type[2]=2; newType.label=newType.unRepe.type[0]; newType.id= t.addId++;
            type.children.push({...newType}); break; 
         }
-        console.log("type:",type)
+        //console.log("type:",type)
         return type 
       },  
       /** 木头类型位置['杂木','樟木',...] */
@@ -265,12 +265,12 @@ export default {
         const parent = node.parent; //点击的上一级对象 
         let lableKey=data.label.split(' 根') 
         let deletKey=lableKey[0]
-        // console.log("deletKey:",deletKey)
+        // //console.log("deletKey:",deletKey)
         if(lableKey[1]){  
           let getDeletKey=parent.data.unRepe[deletKey]    //提取删除的值数据
           let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
           let type=parent.data.unRepe.type //返回的值为木头属性材积 
-          let res= +(num*univalence).toFixed(3);//type[1] ：规格大小的结果  type[0]//大小 type[1] //价格
+          let res= +(num*univalence).newTofixed(3);//type[1] ：规格大小的结果  type[0]//大小 type[1] //价格
        
           //删除对应的规格木头
           let slectTypeShow=""
@@ -280,12 +280,12 @@ export default {
             default: slectTypeShow="medium" ;break;
           }   
 
-          this.clickWood[slectTypeShow]=+(this.clickWood[slectTypeShow]-res).toFixed(3); 
-          console.log('删除时候当前的点击的木头总价', res)
-          console.log("type[1]",type[1])
-          this.little=+(this.clickWood.little).toFixed(3); 
-          this.big=+(this.clickWood.big).toFixed(3);
-          this.medium=+(this.clickWood.medium).toFixed(3); 
+          this.clickWood[slectTypeShow]=+(this.clickWood[slectTypeShow]-res).newTofixed(3); 
+          //console.log('删除时候当前的点击的木头总价', res)
+          //console.log("type[1]",type[1])
+          this.little=+(this.clickWood.little).newTofixed(3); 
+          this.big=+(this.clickWood.big).newTofixed(3);
+          this.medium=+(this.clickWood.medium).newTofixed(3); 
           let [showNumType1,showNumType2,showNumType3]=[0,0,0];
           if(this.clickWood.size.length==3){ [showNumType1,showNumType2,showNumType3]=[0,1,2]   } //全部
           else if(this.clickWood.size.length==2){ [showNumType1,showNumType2,showNumType3]=[0,0,1] } //小 大 
@@ -293,8 +293,8 @@ export default {
            this.clickWood.little*this.clickWood.size[showNumType1].m
           +this.clickWood.medium*this.clickWood.size[showNumType2].m
           +this.clickWood.big*this.clickWood.size[showNumType3].m
-          ).toFixed(3);   
-          console.log(this.clickWood.sum)  
+          ).newTofixed(3);   
+          //console.log(this.clickWood.sum)  
           this.sum=+this.clickWood.sum;  
           delete parent.data.unRepe[deletKey] //删除检测重复属性  
         }else{ 
@@ -315,34 +315,7 @@ export default {
       /** 深拷贝*/
       clone(obj) { return JSON.parse(JSON.stringify(obj)); } 
   } 
-};
-
-/**重置四舍六入无成双 ，为四舍五入 */
-  Number.prototype.toFixed=function (d) { 
-      var s=this+""; 
-      if(!d)d=0; 
-      if(s.indexOf(".")==-1)s+="."; 
-      s+=new Array(d+1).join("0"); 
-      if(new RegExp("^(-|\\+)?(\\d+(\\.\\d{0,"+(d+1)+"})?)\\d*$").test(s)){
-          var s="0"+RegExp.$2,pm=RegExp.$1,a=RegExp.$3.length,b=true;
-          if(a==d+2){
-              a=s.match(/\d/g); 
-              if(parseInt(a[a.length-1])>4){
-                  for(var i=a.length-2;i>=0;i--){
-                      a[i]=parseInt(a[i])+1;
-                      if(a[i]==10){
-                          a[i]=0;
-                          b=i!=1;
-                      }else break;
-                  }
-              }
-              s=a.join("").replace(new RegExp("(\\d+)(\\d{"+d+"})\\d$"),"$1.$2");
-
-          }if(b)s=s.substr(1); 
-          return (pm+s).replace(/\.$/,"");
-      }return this+"";
-
-  }; 
+}; 
 /**
  * L:长m,D:直径cm
  * _nub: 数量 
@@ -356,16 +329,19 @@ export default {
         V = 0.7854 * L * [D + 0.5 * L + 0.005 * (L**2) + 0.000125 * L * ((14 - L)**2) * (D - 10)] ** 2 / 10000 
       }
       else{ V = 0.8 * L * (D + 0.5 * L) ** 2/10**4 }
-      V=V.toFixed(3)//4舍5入
+      V=V.newTofixed(3)//4舍5入
       return +V; 
     }
-/**解决精度 */
-  Number.prototype.newtofixed = function (nub, multiple) {
-    let deci = nub.toString().split('.')[1].length
-    let m = multiple===undefined? deci : multiple
-    m = Math.pow(10, m);//放大倍数
-    // console.log(Math.round(nub * m) / m)
-    return Math.round(nub * m) / m;//4舍5入
+/** 解决精度 */
+  Number.prototype.newTofixed = function (n) { 
+    // arguments[0]
+    if(!n) {return this.valueOf() }//为空就返回值本身
+    else {
+      let deci = this.toString().split('.')[1].length 
+      let m = n||deci
+      deci= Math.pow(10, m);//放大倍数 
+      return Math.round(this * deci) /deci;//4舍5入 
+    } 
 } 
 </script>
 
