@@ -82,7 +82,7 @@ export default {
    data(){
     return {
       data: [],
-      L: 2,D:18,nubValue: 1, little:0 ,medium:0 ,big:0 ,sum:0, 
+      L: 1.8,D:14,nubValue: 1, little:0 ,medium:0 ,big:0 ,sum:0, 
       isOpacity:[false,false,false],
       defaultProps: { children: 'children', label: 'label' },
       addId:0, //增加的树id 
@@ -91,9 +91,9 @@ export default {
       showSum:0,
       wood:[
         // size ：从小到大
-      {name:'杂木' ,statu:false,tree:{ size:[{d:-1,m:500,s:0,n:'little'}] }}, //tree返回的值放入data对应的数据展示
-      {name:'樟木' ,statu:false,tree:{ size:[{d:-1,m:600,s:0,n:'little'},{d:20,m:1000,s:1,n:'medium'},{d:30,m:1500,s:2,n:'big'}]}},
-      {name:'苦楝木',statu:false,tree:{ size:[{d:-1,m:500,s:0,n:'little'},{d:20,m:600,s:1,n:'big'}]}},
+      {name:'杂木' ,statu:false,tree:{ size:[{d:-1,m:500,s:0,n:'little'}]    }}, //tree返回的值放入data对应的数据展示
+      {name:'樟木' ,statu:false,tree:{ size:[{d:-1,m:600,s:0,n:'little'},{d:20,m:1000,s:1,n:'medium'},{d:30,m:1500,s:2,n:'big'}]  }},
+      {name:'苦楝木',statu:false,tree:{ size:[{d:-1,m:500,s:0,n:'little'},{d:20,m:600,s:1,n:'big'}]  }},
       {name:'春芽木',statu:false,tree:{}},
       {name:'其他木',statu:false,tree:{}}
       ],
@@ -124,7 +124,7 @@ export default {
       this.sum= tree.sum
       return this.showgroup
       },
-      sum(){ let sum1=0; this.data.forEach((v)=>{ sum1+=v.sum;});  return this.showSum=sum1; } } ,
+      sum(){ let sum1=0; this.data.forEach((v)=>{ sum1+=v.sum;});  return this.showSum=+sum1.toFixed(3); } } ,
    
   methods:{  
        /** 下拉框选择木材 */
@@ -165,19 +165,37 @@ export default {
         }  
       },
 
-      /** 运算*/
+      /** 运算 */
       calculations:function(){  
-      if(this.showgroup==""){this.open_warn('请选择木材'); return false}
+      if(!this.showgroup){this.open_warn('请选择木材'); return false}
       if(this.nubValue<=0){this.open_warn('至少数量为1'); this.nubValue=1; }
-      let typeSize=this.selectType(this.showgroup,this.D) //选择木头种类
-      // debugger
+      // let typeSize=this.selectType(this.showgroup,this.D) //选择木头种类
+      const typeSize=this.clickWood.size;
+      //  判断添加尺寸类型 小 中 大 (默认是小)
+      let typemMone=typeSize[0].m; //价格
+      let sizeSelct=typeSize[0].n //选择 大小
+      let sizeAppendTree=0 // 选择添加到的tree  
+      if(typeSize[2]&&this.D>=typeSize[2].d){ 
+        typemMone=typeSize[2].m; sizeSelct=typeSize[2].n;sizeAppendTree=2
+        } //大 
+      else if(typeSize[1]&&this.D>=typeSize[1].d){  
+        typemMone=typeSize[1].m;sizeSelct=typeSize[1].n;sizeAppendTree=1
+        } //中 
       
-      this[typeSize.n]=+(this[typeSize.n]+woodcalcu(this.L,this.D)*this.nubValue).toFixed(3) //单算
+      this[sizeSelct]=+(this[sizeSelct]+woodcalcu(this.L,this.D)*this.nubValue).toFixed(3) //单算 
+      
       //判断木头种类返回的值是多少 
-      let sum=+(Number(this.little+this.medium+this.big)*typeSize.m).toFixed(3) //总算
-      this.sum =+sum.toFixed(3)
-      
-      this.append(typeSize.s,typeSize.m)//添加的木材表对应节点 . 存储乘积结果
+      let [showNumType1,showNumType2,showNumType3]=[0,0,0];//选择对应尺寸乘积的价格
+      if(typeSize.length==3){ [showNumType1,showNumType2,showNumType3]=[0,1,2]   } //全部
+      else if(typeSize.length==2){ [showNumType1,showNumType2,showNumType3]=[0,0,1] ;} //小 大 
+ 
+      let sum=+(Number(
+      this.little*typeSize[showNumType1].m
+      +this.medium*typeSize[showNumType2].m
+      +this.big*typeSize[showNumType3].m
+      )).toFixed(3) //总算
+      this.sum =+sum.toFixed(3) 
+      this.append(sizeAppendTree,typemMone)//添加的木材表对应节点 . 存储乘积结果
       
       this.$message({
           message: `填写的值为${this.L} X ${this.D} 数量为：${this.nubValue}`,
@@ -190,23 +208,14 @@ export default {
       this.clickWood.medium=+this.medium;
       this.clickWood.big=+this.big;
       this.clickWood.sum=+this.sum;   
-      this.nubValue=1;
-      // debugger
-      // var checkSum=0;
-      // for(let a in data.children[0].unRepe) { 
-      // if('type'!==a)	{console.log(data.children[0].unRepe[a])
-      // checkSum+=data.children[0].unRepe[a].num*data.children[0].unRepe[a].univalence
-
-      // }
-
-      // }
+      this.nubValue=1; 
       },
       /** 添加 */
-      append(res,productNum) { 
+      append(res,productNum) {  
         let nowLxD=String(this.L+"x"+this.D); // 当前增加的值
         let [strLable,typeSize]=["",res]//0是小，以此类推 中 大 
         let  unRepe=this.clickWood.children[typeSize].unRepe;
-        if(unRepe[nowLxD]!==undefined){ 
+        if(unRepe[nowLxD]){ 
           //  console.clear(); console.log('重复值')
            unRepe[nowLxD].num=Number(unRepe[nowLxD].num+this.nubValue) //当前根数加上原来的根数 
             let arrRepe=this.clickWood.children[typeSize].children; let oldVal=0;
@@ -257,7 +266,7 @@ export default {
         let lableKey=data.label.split(' 根') 
         let deletKey=lableKey[0]
         // console.log("deletKey:",deletKey)
-        if(lableKey[1]!== undefined){  
+        if(lableKey[1]){  
           let getDeletKey=parent.data.unRepe[deletKey]    //提取删除的值数据
           let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
           let type=parent.data.unRepe.type //返回的值为木头属性材积 
@@ -284,68 +293,23 @@ export default {
            this.clickWood.little*this.clickWood.size[showNumType1].m
           +this.clickWood.medium*this.clickWood.size[showNumType2].m
           +this.clickWood.big*this.clickWood.size[showNumType3].m
-          ).toFixed(3);  
-          // this.clickWood.sum=+(this.clickWood.big+this.clickWood.little+this.clickWood.medium).toFixed(3);   
+          ).toFixed(3);   
           console.log(this.clickWood.sum)  
-          this.sum=+this.clickWood.sum; 
-          // debugger; 
+          this.sum=+this.clickWood.sum;  
           delete parent.data.unRepe[deletKey] //删除检测重复属性  
         }else{ 
         this.little=0, this.medium=0, this.big=0, this.sum=0; this.showgroup=""
         }    
         const children = parent.data.children || parent.data;
         const index = children.findIndex(d => d.id === data.id); 
-        children.splice(index, 1);//删除展示数据属性    
-        
+        children.splice(index, 1);//删除展示数据属性     
       //  debugger
         //当删除了木头整个组就恢复添加木材选项
         if(this.woodTIndex().indexOf(data.label)>-1){ 
           let key=this.woodTIndex().indexOf(data.label); this.wood[key].statu=false; 
          } //打开开关 
         window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
-      },
-
-      /**选择类型 */
-      selectType(v,D){
-        console.log(v,D)
-        let[ m,n,s]=[0,"",0] 
-        // this.wood.map((arr)=>{ 
-        //   // 寻找木头
-        //   if(v==arr.name){ 
-        //     // 寻找尺寸相关数据 
-        //     // debugger;
-        //       if (arr.size[2]&&D>=arr.size[2].d&&arr.size.length>1){
-        //         m=arr.size[2].m ;s=arr.size[2].s; n=arr.size[2].n; 
-        //       }
-        //       else if(arr.size[1]&&D>=arr.size[1].d&&arr.size.length==3){
-        //         m=arr.size[1].m ;s=arr.size[1].s; n=arr.size[1].n;
-        //       }else{
-        //         m=arr.size[0].m ;s=arr.size[0].s; n=arr.size[0].n;
-        //       }  
-        //     }
-            
-        //  }) 
-         
-        if(v==this.wood[1].name){
-          // 樟木
-          if (D >= 30){ m=1500;  n='big';s=2 }
-          else if (D >= 20 ){ m=1000 ;n='medium' ;s=1 }
-          else {m=600 ; n='little';}
-        }
-        // 苦楝木
-        else if(v==this.wood[2].name){
-          if(D>=20){m=600 ;n='big' ; s=1}
-          else {m=500;n='little';}
-        }
-        //杂木
-        else{ m=500;n='little' ; } 
- 
-        // debugger;
-        // m:判断类别材积的值
-       
-        //  debugger;
-            return {m,s,n}
-      },  
+      }, 
       /** 警告添加木材*/
       open_warn(v) { this.$message({ message: v,  showClose: true, type: 'warning' }); },
       /** 深拷贝*/
@@ -396,9 +360,9 @@ export default {
       return +V; 
     }
 /**解决精度 */
-  Math.formatFloat = function (nub, multiple) {
+  Number.prototype.newtofixed = function (nub, multiple) {
     let deci = nub.toString().split('.')[1].length
-    let m = multiple === undefined ? deci : multiple
+    let m = multiple===undefined? deci : multiple
     m = Math.pow(10, m);//放大倍数
     // console.log(Math.round(nub * m) / m)
     return Math.round(nub * m) / m;//4舍5入
