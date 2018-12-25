@@ -182,14 +182,14 @@ export default {
         typemMone=typeSize[1].m;sizeSelct=typeSize[1].n;sizeAppendTree=1
         } //中 
       
-      this[sizeSelct]=+(this[sizeSelct]+woodcalcu(this.L,this.D)*this.nubValue).newTofixed(3) //单算 
+      this[sizeSelct]=(this[sizeSelct]+woodcalcu(this.L,this.D)*this.nubValue).newTofixed(3) //单算 
       
       //判断木头种类返回的值是多少 
       let [showNumType1,showNumType2,showNumType3]=[0,0,0];//选择对应尺寸乘积的价格
       if(typeSize.length==3){ [showNumType1,showNumType2,showNumType3]=[0,1,2]   } //全部
       else if(typeSize.length==2){ [showNumType1,showNumType2,showNumType3]=[0,0,1] ;} //小 大 
  
-      let sum=+(Number(
+      let sum=(Number(
       this.little*typeSize[showNumType1].m
       +this.medium*typeSize[showNumType2].m
       +this.big*typeSize[showNumType3].m
@@ -270,7 +270,7 @@ export default {
           let getDeletKey=parent.data.unRepe[deletKey]    //提取删除的值数据
           let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
           let type=parent.data.unRepe.type //返回的值为木头属性材积 
-          let res= +(num*univalence).newTofixed(3);//type[1] ：规格大小的结果  type[0]//大小 type[1] //价格
+          let res= (num*univalence).newTofixed(3);//type[1] ：规格大小的结果  type[0]//大小 type[1] //价格
        
           //删除对应的规格木头
           let slectTypeShow=""
@@ -279,17 +279,17 @@ export default {
             case 2:slectTypeShow="big";  break;//大
             default: slectTypeShow="medium" ;break;
           }   
-
-          this.clickWood[slectTypeShow]=+(this.clickWood[slectTypeShow]-res).newTofixed(3); 
+        
+          this.clickWood[slectTypeShow]=(this.clickWood[slectTypeShow]-res).newTofixed(3); 
           //console.log('删除时候当前的点击的木头总价', res)
           //console.log("type[1]",type[1])
-          this.little=+(this.clickWood.little).newTofixed(3); 
-          this.big=+(this.clickWood.big).newTofixed(3);
-          this.medium=+(this.clickWood.medium).newTofixed(3); 
+          this.little=(this.clickWood.little).newTofixed(3); 
+          this.big=(this.clickWood.big).newTofixed(3);
+          this.medium=(this.clickWood.medium).newTofixed(3); 
           let [showNumType1,showNumType2,showNumType3]=[0,0,0];
           if(this.clickWood.size.length==3){ [showNumType1,showNumType2,showNumType3]=[0,1,2]   } //全部
           else if(this.clickWood.size.length==2){ [showNumType1,showNumType2,showNumType3]=[0,0,1] } //小 大 
-          this.clickWood.sum=+(
+          this.clickWood.sum=(
            this.clickWood.little*this.clickWood.size[showNumType1].m
           +this.clickWood.medium*this.clickWood.size[showNumType2].m
           +this.clickWood.big*this.clickWood.size[showNumType3].m
