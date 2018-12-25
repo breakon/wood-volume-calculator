@@ -259,21 +259,20 @@ export default {
       woodTIndex(){ let type=[]; this.wood.forEach(v => { type.push(v.name) });  return type}, 
 
       /** 删除 */
-      remove(node, data){  
-        console.log("remove",node,data)
-        if(data.id!==this.clickWood.id){
-          this.open_warn('只能选择删除当前选择木头，请选择后再操作')
-          window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
-          return false
-        }
-        if(!confirm("是否删除")){   
-          window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
-         return false  } 
-        // return false;
+      remove(node, data){   
+
+        let bool=this.clickWood.children.findIndex(v=>{ return v.id==node.parent.data.id}) 
+         bool=this.clickWood.id===data.id? 1:bool //验证是否是同一木头
+        if(!confirm("是否删除")|| bool<0){ 
+         if( bool<0) { 
+         this.open_warn('只能选择删除当前选择木头，请选择后再操作');
+          }
+         window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
+         return false 
+          }  
         const parent = node.parent; //点击的上一级对象 
         let lableKey=data.label.split(' 根') 
-        let deletKey=lableKey[0]
-        // console.log("deletKey:",deletKey)
+        let deletKey=lableKey[0]  
         if(lableKey[1]){  
           let getDeletKey=parent.data.unRepe[deletKey]    //提取删除的值数据
           let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
@@ -306,6 +305,7 @@ export default {
           this.sum=this.clickWood.sum;  
           delete parent.data.unRepe[deletKey] //删除检测重复属性  
         }else{ 
+          
         this.little=0, this.medium=0, this.big=0, this.sum=0; this.showgroup=""
         }    
         const children = parent.data.children || parent.data;
