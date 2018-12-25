@@ -31,5 +31,21 @@ npm run unit
 
 # run all tests
 npm test
-``` .
+``` 
+
+## 产品展示
+
+![截图](static/img/projects_dome.jpg)
+![截图](static/img/projects_dome1.jpg)
+![截图](static/img/projects_dome2.jpg)
+
+`依照这3张数据来制定的`
+
+![截图](static/img/datamain.png)
+![截图](static/img/data1.png)
+![截图](static/img/data2.png)
+
+### 使用
+
+点击中间就是开始计算，计算结果保留3为小数，计算结果由3个公式控制 
 
