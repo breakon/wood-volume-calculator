@@ -102,7 +102,7 @@ export default {
    
    watch:{
       showgroup:function(newVal, oldVal){
-        //console.log("show:",newVal)
+        console.log("show:",newVal)
           // 找到了点击的树枝子节点
         let index=this.data.findIndex((value, index, arr) => {
           return value.label== this.showgroup
@@ -124,12 +124,12 @@ export default {
       this.sum= tree.sum
       return this.showgroup
       },
-      sum(){ let sum1=0; this.data.forEach((v)=>{ sum1+=v.sum;});  return this.showSum=+sum1.newTofixed(5); } } ,
+      sum(){ let sum1=0; this.data.forEach((v)=>{ sum1+=v.sum;});  return this.showSum=sum1.newTofixed(5); } } ,
    
   methods:{  
        /** 下拉框选择木材 */
        handleCommand(command ){ 
-         console.clear() ; //console.log("command",command);
+         console.clear() ; console.log("command",command);
          const t=this; let wood=t.wood;  let n=0,s=0;
          switch(command){
           case wood[0].name: n=0 ;     break;//杂木 initWoddType 0默认为小
@@ -160,7 +160,7 @@ export default {
           }
           vueComp.$el.childNodes[0].className +=" select-wood"  
            this.showgroup=data.label; //点击的
-           //console.log( "handleNodeCilk",data);  
+           console.log( "handleNodeCilk",data);  
            this.clickWood=data 
         }  
       },
@@ -194,7 +194,7 @@ export default {
       +this.medium*typeSize[showNumType2].m
       +this.big*typeSize[showNumType3].m
       )).newTofixed(3) //总算
-      this.sum =+sum.newTofixed(3) 
+      this.sum =sum.newTofixed(3) 
       this.append(sizeAppendTree,typemMone)//添加的木材表对应节点 . 存储乘积结果
       
       this.$message({
@@ -204,10 +204,10 @@ export default {
           type: 'success'
         });
       //同步计算结果 
-      this.clickWood.little=+this.little; 
-      this.clickWood.medium=+this.medium;
-      this.clickWood.big=+this.big;
-      this.clickWood.sum=+this.sum;   
+      this.clickWood.little=this.little; 
+      this.clickWood.medium=this.medium;
+      this.clickWood.big=this.big;
+      this.clickWood.sum=this.sum;   
       this.nubValue=1; 
       },
       /** 添加 */
@@ -216,7 +216,7 @@ export default {
         let [strLable,typeSize]=["",res]//0是小，以此类推 中 大 
         let  unRepe=this.clickWood.children[typeSize].unRepe;
         if(unRepe[nowLxD]){ 
-          //  console.clear(); //console.log('重复值')
+          //  console.clear(); console.log('重复值')
            unRepe[nowLxD].num=Number(unRepe[nowLxD].num+this.nubValue) //当前根数加上原来的根数 
             let arrRepe=this.clickWood.children[typeSize].children; let oldVal=0;
            for(let i=0;i<arrRepe.length;i++){ 
@@ -227,10 +227,10 @@ export default {
            }  
           strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${unRepe[nowLxD].univalence} `
           let newChild ={ id:oldVal ,label:strLable  }
-           //console.log(newChild)
+           console.log(newChild)
           this.clickWood.children[typeSize].children.push(newChild);
         }else{ 
-          //console.log('新的值newUnRepe',this.nubValue)
+          console.log('新的值newUnRepe',this.nubValue)
           unRepe[nowLxD]={ num: this.nubValue, univalence:woodcalcu(this.L,this.D) } //创建一个记录重复值的对象 
           strLable=`${nowLxD} 根:${unRepe[nowLxD].num} 材积:${unRepe[nowLxD].univalence} `
           let newChild ={ id: this.addId++,label:strLable  }
@@ -252,7 +252,7 @@ export default {
           case 1: newType.unRepe.type[0]='大';newType.unRepe.type[2]=2; newType.label=newType.unRepe.type[0]; newType.id= t.addId++;
            type.children.push({...newType}); break; 
         }
-        //console.log("type:",type)
+        console.log("type:",type)
         return type 
       },  
       /** 木头类型位置['杂木','樟木',...] */
@@ -260,12 +260,20 @@ export default {
 
       /** 删除 */
       remove(node, data){  
-        if(!confirm("是否删除")){  return false  } 
+        console.log("remove",node,data)
+        if(data.id!==this.clickWood.id){
+          this.open_warn('只能选择删除当前选择木头，请选择后再操作')
+          window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
+          return false
+        }
+        if(!confirm("是否删除")){   
+          window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
+         return false  } 
         // return false;
         const parent = node.parent; //点击的上一级对象 
         let lableKey=data.label.split(' 根') 
         let deletKey=lableKey[0]
-        // //console.log("deletKey:",deletKey)
+        // console.log("deletKey:",deletKey)
         if(lableKey[1]){  
           let getDeletKey=parent.data.unRepe[deletKey]    //提取删除的值数据
           let [num,univalence]=[getDeletKey.num ,getDeletKey.univalence]
@@ -281,11 +289,11 @@ export default {
           }   
         
           this.clickWood[slectTypeShow]=(this.clickWood[slectTypeShow]-res).newTofixed(3); 
-          //console.log('删除时候当前的点击的木头总价', res)
-          //console.log("type[1]",type[1])
-          this.little=(this.clickWood.little).newTofixed(3); 
-          this.big=(this.clickWood.big).newTofixed(3);
-          this.medium=(this.clickWood.medium).newTofixed(3); 
+          console.log('删除时候当前的点击的木头总价', res)
+          console.log("type[1]",type[1])
+          this.little=this.clickWood.little.newTofixed(3); 
+          this.big=this.clickWood.big.newTofixed(3);
+          this.medium=this.clickWood.medium.newTofixed(3); 
           let [showNumType1,showNumType2,showNumType3]=[0,0,0];
           if(this.clickWood.size.length==3){ [showNumType1,showNumType2,showNumType3]=[0,1,2]   } //全部
           else if(this.clickWood.size.length==2){ [showNumType1,showNumType2,showNumType3]=[0,0,1] } //小 大 
@@ -294,8 +302,8 @@ export default {
           +this.clickWood.medium*this.clickWood.size[showNumType2].m
           +this.clickWood.big*this.clickWood.size[showNumType3].m
           ).newTofixed(3);   
-          //console.log(this.clickWood.sum)  
-          this.sum=+this.clickWood.sum;  
+          console.log(this.clickWood.sum)  
+          this.sum=this.clickWood.sum;  
           delete parent.data.unRepe[deletKey] //删除检测重复属性  
         }else{ 
         this.little=0, this.medium=0, this.big=0, this.sum=0; this.showgroup=""
