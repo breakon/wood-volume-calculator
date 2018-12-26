@@ -3,7 +3,7 @@
     <nav>
     <div class="header">
       <div class="header-top" style="">材积表计算 </div> 
-    <div class="share-top"> 关于 </div>
+    <div @click="open" class="share-top"> 关于 </div>
     </div> 
     </nav>
      <main style="height:100%">
@@ -41,7 +41,7 @@
       <div slot="header" class="clearfix">
         <span>总额 ：{{showSum}} </span>  
       </div> 
-      <div @click="calculations"  class="text item">
+      <div  class="text item">
         <div v-bind:class="{ opacityfont:isOpacity[0]}" >小：<span >{{little}}</span></div>
         <div v-bind:class="{ opacityfont:isOpacity[1]}" >中：<span v-text="medium" >0</span></div>
         <div v-bind:class="{ opacityfont:isOpacity[2]}" >大：<span  v-text="big" >0</span></div>
@@ -70,6 +70,8 @@
       show-input>
     </el-slider>
   </div>  
+  <el-button   @click="resetCalcula" class="bott-butt-data reset-data" type="primary">重置</el-button>
+  <el-button  @click="calculations" class="bott-butt-data   submit-data" type="primary">结算</el-button>
   </div>
   </div>
 </template>
@@ -318,6 +320,19 @@ export default {
          } //打开开关 
         window.event? window.event.cancelBubble = true : e.stopPropagation();//冒泡停止 防止选择handle
       }, 
+      resetCalcula(){
+         if(!confirm("是否清空")){ return false }
+         this.data=[]
+        this.showgroup=""
+        for(let w of this.wood){ w.statu=false }
+      },
+       open() {
+        this.$alert(`  本软件是开源，使用方法很简单，添加木材后，
+        选择目录树进行切换木材，如果觉得有bug或者建议可以联系我。联系方式：djl@breakon.top`, '关于', {
+          confirmButtonText: '关闭',
+        
+        });
+      },
       /** 警告添加木材*/
       open_warn(v) { this.$message({ message: v,  showClose: true, type: 'warning' }); },
       /** 深拷贝*/
@@ -370,7 +385,10 @@ export default {
   top: 5px;
   right: 5px
   font-size: 14px;
-
+.el-card__body
+  padding:10px 10px 10px 15px
+.el-card__header
+  padding: 4px 20px
 
 .select-wood
   background: #cbe9ec  !important;
@@ -407,19 +425,32 @@ export default {
 .el-input-number--medium , .el-input__inner
     width :100% !important;
   
-.row-bg {
-    padding: 10px 0;
-    background-color: #f9fafc;
-  }
-.el-message{
-   top:0px;
+.row-bg 
+  padding: 10px 0;
+  background-color: #f9fafc;
+  
+.el-message
+  top:0px;
   height: 30px;
-}
-.header-top{
-    margin: auto;
-    width: 100%;
-    text-align: center;
-    line-height: 1.9;
-}
 
+.header-top
+  margin: auto;
+  width: 100%;
+  text-align: center;
+  line-height: 1.9;
+
+.bott-butt-data
+  width:30%; 
+.reset-data
+  backgound:#51b1c7;
+  float:left
+  margin-left:10px
+.el-button--primary 
+  background:#d0a759
+.submit-data
+  float:right
+  margin-right :10px;
+  background:#36c189
+.el-message-box
+  width:95%;
 </style>

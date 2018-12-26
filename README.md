@@ -35,9 +35,8 @@ npm test
 
 ## 产品展示
 
-![截图](static/img/projects_dome.jpg)
-![截图](static/img/projects_dome1.jpg)
 ![截图](static/img/projects_dome2.jpg)
+
 
 `依照这3张数据来制定的`
 
