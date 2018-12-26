@@ -386,9 +386,9 @@ export default {
   right: 5px
   font-size: 14px;
 .el-card__body
-  padding:10px 10px 10px 15px
+  padding:10px 10px 10px 15px !important
 .el-card__header
-  padding: 4px 20px
+  padding: 4px 20px !important
 
 .select-wood
   background: #cbe9ec  !important;
@@ -426,7 +426,7 @@ export default {
     width :100% !important;
   
 .row-bg 
-  padding: 10px 0;
+  padding: 10px 0 !important ;
   background-color: #f9fafc;
   
 .el-message
@@ -440,17 +440,19 @@ export default {
   line-height: 1.9;
 
 .bott-butt-data
-  width:30%; 
+  margin-top:8px !important;
+  width:30% !important; 
 .reset-data
   backgound:#51b1c7;
   float:left
   margin-left:10px
 .el-button--primary 
-  background:#d0a759
+  background:#d0a759 !important
 .submit-data
   float:right
+
   margin-right :10px;
-  background:#36c189
+  background:#36c189 !important
 .el-message-box
-  width:95%;
+  width:95% !important;
 </style>

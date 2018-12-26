@@ -35,14 +35,14 @@ npm test
 
 ## 产品展示
 
-![截图](static/img/projects_dome2.jpg)
+![截图](readme/img/projects_dome2.jpg)
 
 
 `依照这3张数据来制定的`
 
-![截图](static/img/datamain.png)
-![截图](static/img/data1.png)
-![截图](static/img/data2.png)
+![截图](readme/img/datamain.png)
+![截图](readme/img/data1.png)
+![截图](readme/img/data2.png)
 
 ### 使用
 
